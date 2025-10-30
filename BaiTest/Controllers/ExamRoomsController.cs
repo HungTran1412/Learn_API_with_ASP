@@ -1,6 +1,7 @@
 ﻿using BaiTest.DTOs;
 using BaiTest.Models;
 using BaiTest.Services;
+using BaiTest.Services.Impl;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BaiTest.Controllers
@@ -9,16 +10,20 @@ namespace BaiTest.Controllers
     [Route("/room")]
     public class ExamRoomsController : ControllerBase
     {
+        IExamRoomsService examRoomsService;
+
         public ExamRoomsController()
         {
+            examRoomsService = new ExamRoomsServiceImpl();
         }
+
         [HttpGet]
-        public ActionResult<List<ExamRooms>> GetAll() => ExamRoomsService.GetAll;
+        public ActionResult<List<ExamRooms>> GetAll() => examRoomsService.GetAll();
 
         [HttpGet("{id}")]
         public ActionResult<ExamRooms> Get(int id)
         {
-            var room = ExamRoomsService.Get(id);
+            var room = examRoomsService.Get(id);
             if(room == null) 
                 return NotFound();
             return Ok(room);
@@ -29,7 +34,7 @@ namespace BaiTest.Controllers
         {
             if(request == null)
                 return BadRequest("Thông tin không hợp lệ!");
-            var r = ExamRoomsService.Add(request);
+            var r = examRoomsService.Add(request);
 
             return Ok(r);
         }
@@ -42,7 +47,7 @@ namespace BaiTest.Controllers
                 return BadRequest("Thông tin không hợp lệ!");
             }
 
-            var update = ExamRoomsService.Update(id, request);
+            var update = examRoomsService.Update(id, request);
 
             if(update == null)
                 return NotFound($"Không tìm thấy phòng có id: {id}");
@@ -53,10 +58,10 @@ namespace BaiTest.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            var e = ExamRoomsService.Get(id);
+            var e = examRoomsService.Get(id);
             if(e == null)
                 return NotFound() ;
-            ExamRoomsService.Remove(id);
+            examRoomsService.Delete(id);
             return Ok("Xóa phòng thành công!");
         }
     }

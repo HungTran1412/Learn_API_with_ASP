@@ -1,4 +1,5 @@
 ﻿using BaiTest.Models;
+using Microsoft.EntityFrameworkCore;
 namespace BaiTest.Models
 {
     public class Student

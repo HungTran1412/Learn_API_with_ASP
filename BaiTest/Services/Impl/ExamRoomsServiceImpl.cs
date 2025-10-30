@@ -1,13 +1,13 @@
 ﻿using BaiTest.DTOs;
 using BaiTest.Models;
 
-namespace BaiTest.Services
+namespace BaiTest.Services.Impl
 {
-    public class ExamRoomsService
+    public class ExamRoomsServiceImpl : IExamRoomsService
     {
         static List<ExamRooms> ListRoom { get; set; }
-        static int nextId = 3;
-        static ExamRoomsService()
+        int nextId = 3;
+        public ExamRoomsServiceImpl()
         {
             ListRoom = new List<ExamRooms>
             {
@@ -16,11 +16,11 @@ namespace BaiTest.Services
             };
         }
 
-        public static List<ExamRooms> GetAll => ListRoom;
+        public List<ExamRooms> GetAll() => ListRoom;
 
-        public static ExamRooms Get(int id) => ListRoom.FirstOrDefault(r => r.Id == id);
+        public ExamRooms Get(int id) => ListRoom.FirstOrDefault(r => r.Id == id);
 
-        public static ExamRooms Add(ExamRoomsRequest e)
+        public ExamRooms Add(ExamRoomsRequest e)
         {
             var newRoom = new ExamRooms
             {
@@ -33,7 +33,7 @@ namespace BaiTest.Services
             return newRoom;
         }
 
-        public static ExamRooms Update(int id, ExamRoomsRequest request)
+        public ExamRooms Update(int id, ExamRoomsRequest request)
         {
             var index = ListRoom.FindIndex(r => r.Id == id);
             if (index < 0)
@@ -46,12 +46,22 @@ namespace BaiTest.Services
             return updated;
         }
 
-        public static void Remove(int id)
+        public void Remove(int id)
         {
             var del = Get(id);
             if (del is null)
                 return;
             ListRoom.Remove(del);
+        }
+
+        public ExamRooms Update(ExamRoomsRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Delete(int id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

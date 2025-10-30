@@ -1,26 +1,29 @@
 ﻿using BaiTest.DTOs;
 using BaiTest.Models;
 using BaiTest.Services;
+using BaiTest.Services.Impl;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BaiTest.Controllers
 {
-    [Controller]
+    [ApiController]
     [Route("/exam")]
     public class ExamAssignmentController : ControllerBase
     {
+        IExamAssignmentService examAssignmentService;
         public ExamAssignmentController()
         {
+            examAssignmentService = new ExamAssignmentServiceImpl();
         }
 
 
         [HttpGet]
-        public ActionResult<List<ExamAssignments>> GetAll() => ExamAssignmentService.GetAll;
+        public ActionResult<List<ExamAssignments>> GetAll() => examAssignmentService.GetAll();
 
         [HttpGet("{id}")]
         public ActionResult<ExamAssignments> Get(int id)
         {
-            var room = ExamAssignmentService.GetExamByRoomId(id);
+            var room = examAssignmentService.GetExamByRoomId(id);
             if (room == null)
             {
                 return NotFound();
@@ -32,7 +35,7 @@ namespace BaiTest.Controllers
         [HttpGet("student/{roomId}")]
         public ActionResult<List<Student>> GetStudentInRoom(int roomId)
         {
-            var assignment = ExamAssignmentService.GetListStudentInRoom(roomId);
+            var assignment = examAssignmentService.GetListStudentInRoom(roomId);
             if(assignment == null)
                 return NotFound($"Không tìm thấy phân công nào trong phòng ID {roomId}.");
             return Ok(assignment);
@@ -49,7 +52,7 @@ namespace BaiTest.Controllers
             }
 
             // 2. Gọi hàm Service
-            var newAssignment = ExamAssignmentService.Add(request);
+            var newAssignment = examAssignmentService.Add(request);
 
             // 3. Xử lý kết quả từ Service
             if (newAssignment == null)
@@ -61,6 +64,22 @@ namespace BaiTest.Controllers
             return CreatedAtAction(nameof(Get), new { id = newAssignment.Id }, newAssignment);
         }
 
-      
+        [HttpDelete("/delete-student/")]
+        public IActionResult Delete([FromBody] ExamAssignmentRequest request)
+        {
+            if(request == null || request.RoomId <= 0 || request.StudentId <= 0)
+            {
+                return BadRequest("Dữ liệu bị thiếu!");
+            }
+
+            bool deleted = examAssignmentService.DeleteStudentFromRoom(request);
+
+            if (!deleted)
+            {
+                return BadRequest($"Không tìm thấy sinh viên có id là {request.StudentId} trong danh sách!"); 
+            }
+
+            return Ok("Xóa sinh viên khỏi phòng thi thành công!");
+        }
     }
 }

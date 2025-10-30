@@ -1,13 +1,13 @@
 ﻿using BaiTest.DTOs;
 using BaiTest.Models;
 
-namespace BaiTest.Services
+namespace BaiTest.Services.Impl
 {
-    public static class StudentService
+    public class StudentServiceImpl: IStudentService
     {
         static List<Student> StudentList { get; set; }
-        static int nextId = 3;
-        static StudentService()
+        int nextId = 3;
+        public StudentServiceImpl()
         {
             StudentList = new List<Student>
             {
@@ -16,11 +16,11 @@ namespace BaiTest.Services
             };
         }
 
-        public static List<Student> GetAll => StudentList;
+        public List<Student> GetAll() => StudentList;
 
-        public static Student Get(int id) => StudentList.FirstOrDefault(s => s.Id == id);
+        public Student Get(int id) => StudentList.FirstOrDefault(s => s.Id == id);
 
-        public static Student Add(StudentRequest s)
+        public Student Add(StudentRequest s)
         {
             var newStudent = new Student
             {
@@ -35,7 +35,7 @@ namespace BaiTest.Services
             return newStudent;
         }
 
-        public static Student Update(int id, StudentRequest s)
+        public Student Update(int id, StudentRequest s)
         {
             var index = StudentList.FindIndex(s1 => s1.Id == id);
             if (index == -1)
@@ -49,12 +49,22 @@ namespace BaiTest.Services
             return updatedStudent;
         }
 
-        public static void Remove(int id)
+        public void Remove(int id)
         {
             var student = Get(id);
             if (student is null)
                 return;
             StudentList.Remove(student);
+        }
+
+        List<Student> IStudentService.GetAll()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Delete(int id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

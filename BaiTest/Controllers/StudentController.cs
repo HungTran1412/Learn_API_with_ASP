@@ -1,6 +1,7 @@
 ﻿using BaiTest.DTOs;
 using BaiTest.Models;
 using BaiTest.Services;
+using BaiTest.Services.Impl;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -10,17 +11,20 @@ namespace BaiTest.Controllers
     [Route("[controller]")]
     public class StudentController : ControllerBase
     {
+        IStudentService studentService;
+
         public StudentController()
         {
+            studentService = new StudentServiceImpl();
         }
 
         [HttpGet]
-        public ActionResult<List<Student>> GetAll() => StudentService.GetAll;
+        public ActionResult<List<Student>> GetAll() => studentService.GetAll();
 
         [HttpGet("{id}")]
         public ActionResult<Student> Get(int id)
         {
-            var student = StudentService.Get(id);
+            var student = studentService.Get(id);
             if(student == null) 
                 return NotFound();
             return Ok(student);
@@ -31,7 +35,7 @@ namespace BaiTest.Controllers
         {
             if (s == null)
                 return BadRequest("Thông tin không hợp lệ!");
-            var newStudent =  StudentService.Add(s);
+            var newStudent =  studentService.Add(s);
 
             return Ok(newStudent);
         }
@@ -44,7 +48,7 @@ namespace BaiTest.Controllers
                 return BadRequest("Thông tin không hợp lệ!");
             }
 
-            var updatedStudent = StudentService.Update(id, s);
+            var updatedStudent = studentService.Update(id, s);
 
             if (updatedStudent == null)
             {
@@ -57,10 +61,10 @@ namespace BaiTest.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            var s = StudentService.Get(id);
+            var s = studentService.Get(id);
             if(s == null)
                 return NotFound();
-            StudentService.Remove(id);
+            studentService.Delete(id);
             return Ok("Xóa sinnh viên thành công!");
         }
     }
