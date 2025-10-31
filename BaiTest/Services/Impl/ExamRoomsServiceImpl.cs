@@ -27,7 +27,7 @@ namespace BaiTest.Services.Impl
                 RoomCode = request.RoomCode,
                 Capacity = request.Capacity,
             };
-
+            
             await db.ExamRooms.AddAsync(newRoom);
 
             //luu vao db
@@ -64,6 +64,7 @@ namespace BaiTest.Services.Impl
             if (room == null) return null;
             return new ExamRoomResponse
             {
+                Id= room.Id,
                 RoomCode = room.RoomCode,
                 Capacity = room.Capacity,
             };
