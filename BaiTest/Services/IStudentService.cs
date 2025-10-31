@@ -1,14 +1,16 @@
 ﻿using BaiTest.DTOs;
+using BaiTest.DTOs.Request;
+using BaiTest.DTOs.Response;
 using BaiTest.Models;
 
 namespace BaiTest.Services
 {
     public interface IStudentService
     {
-        List<Student> GetAll();
-        Student Get(int id);
-        Student Add(StudentRequest request);
-        Student Update(int id, StudentRequest request);
-        void Delete(int id);
+        Task<List<StudentResponse>> GetAllAsync();
+        Task<StudentResponse?> GetByStudentCodeAsync(string studentCode);
+        Task<Student?> AddAsync(StudentRequest request);
+        Task<StudentResponse?> UpdateAsync(string studentCode,StudentUpdateRequest request);
+        Task DeleteAsync(string studentCode);
     }
 }

@@ -1,70 +1,103 @@
 ﻿using BaiTest.DTOs;
+using BaiTest.DTOs.Request;
+using BaiTest.DTOs.Response;
 using BaiTest.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace BaiTest.Services.Impl
 {
-    public class StudentServiceImpl: IStudentService
+    public class StudentServiceImpl : IStudentService
     {
-        static List<Student> StudentList { get; set; }
-        int nextId = 3;
-        public StudentServiceImpl()
+        private DatabaseContext db;
+
+        public StudentServiceImpl(DatabaseContext db)
         {
-            StudentList = new List<Student>
+            this.db = db;
+        }
+
+        public async Task<List<StudentResponse>> GetAllAsync()
+        {
+            var studentList = await db.Students.ToListAsync();
+
+            var response = studentList.Select(s => new StudentResponse
             {
-                new Student(1, "001", "A", "OOP"),
-                new Student(2, "002", "A", "OOP")
+                StudentCode = s.StudentCode,
+                Name = s.Name,
+                Class = s.Class,
+                Subject = s.Subject,
+            }).ToList();
+
+            return response;
+        }
+
+        public async Task<StudentResponse?> GetByStudentCodeAsync(string studentCode)
+        {
+            var student = await db.Students.SingleOrDefaultAsync(s => s.StudentCode == studentCode);
+
+            if (student == null) return null;
+
+            return new StudentResponse
+            {
+                StudentCode = student.StudentCode,
+                Name = student.Name,
+                Class = student.Class,
+                Subject = student.Subject,
             };
         }
 
-        public List<Student> GetAll() => StudentList;
-
-        public Student Get(int id) => StudentList.FirstOrDefault(s => s.Id == id);
-
-        public Student Add(StudentRequest s)
+        public async Task<Student?> AddAsync(StudentRequest request)
         {
+            //kiem tra xem ma sinh vien co ton tai khong
+            var student = await db.Students.SingleOrDefaultAsync(s => s.StudentCode == request.StudentCode);
+            if (student != null)
+            {
+                return null;
+            }
+            //tao moi doi tuong
             var newStudent = new Student
             {
-                StudentCode = s.StudentCode,
-                Class = s.Class,
-                Subject = s.Subject,
+                StudentCode = request.StudentCode,
+                Name = request.Name,
+                Class = request.Class,
+                Subject = request.Subject
             };
 
-            newStudent.Id = nextId++;
-            StudentList.Add(newStudent);
+            await db.Students.AddAsync(newStudent);
+            //luu vao db
+            await db.SaveChangesAsync();
 
             return newStudent;
         }
 
-        public Student Update(int id, StudentRequest s)
+        public async Task<StudentResponse?> UpdateAsync(string studentCode, StudentUpdateRequest request)
         {
-            var index = StudentList.FindIndex(s1 => s1.Id == id);
-            if (index == -1)
-                return null;
+            //Kiểm tra xem sinh viên có tồn tại không
+            var student = await db.Students.SingleOrDefaultAsync(s => s.StudentCode == studentCode);
 
-            var updatedStudent = StudentList[index];
-            updatedStudent.StudentCode = s.StudentCode;
-            updatedStudent.Class = s.Class;
-            updatedStudent.Subject = s.Subject;
+            //Trả về null nếu không tìm thấy
+            if (student == null) return null;
 
-            return updatedStudent;
+            student.Name = request.Name;
+            student.Class = request.Class;
+            student.Subject = request.Subject;
+
+
+            await db.SaveChangesAsync();
+            return new StudentResponse
+            {
+                StudentCode = student.StudentCode,
+                Name = student.Name,
+                Class = student.Class,
+                Subject = student.Subject,
+            };
         }
 
-        public void Remove(int id)
+        public async Task DeleteAsync(string studentCode)
         {
-            var student = Get(id);
-            if (student is null)
-                return;
-            StudentList.Remove(student);
-        }
-
-        List<Student> IStudentService.GetAll()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Delete(int id)
-        {
-            throw new NotImplementedException();
+            var student = await db.Students.SingleOrDefaultAsync(s => s.StudentCode == studentCode);
+            if(student == null) return;
+            db.Students.Remove(student);
+            await db.SaveChangesAsync();
         }
     }
 }

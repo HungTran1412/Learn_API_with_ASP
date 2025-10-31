@@ -1,14 +1,16 @@
 ﻿using BaiTest.DTOs;
+using BaiTest.DTOs.Request;
+using BaiTest.DTOs.Response;
 using BaiTest.Models;
 
 namespace BaiTest.Services
 {
     public interface IExamRoomsService
     {
-        List<ExamRooms> GetAll();
-        ExamRooms Get(int id);
-        ExamRooms Add(ExamRoomsRequest request);
-        ExamRooms Update(int id,ExamRoomsRequest request);
-        void Delete(int id);
+        Task<List<ExamRoomResponse>> GetAllAsync();
+        Task<ExamRoomResponse> GetByCodeAsync(String roomCode);
+        Task<ExamRoom?> AddAsync(ExamRoomRequest request);
+        Task<ExamRoomResponse> UpdateAsync(String roomCode, ExamRoomRequest request);
+        Task DeleteAsync(String roomCode);
     }
 }
