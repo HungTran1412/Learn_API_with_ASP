@@ -46,7 +46,7 @@ namespace BaiTest.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Lỗi server khi truy vấn sinh viên ID {studentCode}.");
+                return StatusCode(500, $"Lỗi server khi truy vấn mã sinh viên {studentCode}.");
             }
         }
 
@@ -66,13 +66,13 @@ namespace BaiTest.Controllers
             }
         }
 
-        [HttpPut("update/{studentCode}")]
-        public async Task<ActionResult> UpdateAsync(string studentCode,[FromBody] StudentUpdateRequest request)
+        [HttpPut("update/{id}")]
+        public async Task<ActionResult> UpdateAsync(string id,[FromBody] StudentUpdateRequest request)
         {
             try
             {
-                var update = await studentService.UpdateAsync(studentCode, request);
-                if (update == null) return NotFound($"Không tìm thấy sinh viên có mã: {studentCode}");
+                var update = await studentService.UpdateAsync(id, request);
+                if (update == null) return NotFound($"Không tìm thấy sinh viên có mã: {id}");
                 return Ok(update);
             }
             catch (Exception e)

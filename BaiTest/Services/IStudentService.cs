@@ -10,7 +10,7 @@ namespace BaiTest.Services
         Task<List<StudentResponse>> GetAllAsync();
         Task<StudentResponse?> GetByStudentCodeAsync(string studentCode);
         Task<Student?> AddAsync(StudentRequest request);
-        Task<StudentResponse?> UpdateAsync(string studentCode,StudentUpdateRequest request);
+        Task<StudentResponse?> UpdateAsync(string studentCode, StudentUpdateRequest request);
         Task DeleteAsync(string studentCode);
     }
 }

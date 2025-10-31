@@ -10,7 +10,7 @@ namespace BaiTest.Services
         Task<List<ExamRoomResponse>> GetAllAsync();
         Task<ExamRoomResponse> GetByCodeAsync(String roomCode);
         Task<ExamRoom?> AddAsync(ExamRoomRequest request);
-        Task<ExamRoomResponse> UpdateAsync(String roomCode, ExamRoomRequest request);
+        Task<ExamRoomResponse?> UpdateAsync(String roomCode, ExamRoomUpdateRequest request);
         Task DeleteAsync(String roomCode);
     }
 }

@@ -21,6 +21,7 @@ namespace BaiTest.Services.Impl
 
             var response = studentList.Select(s => new StudentResponse
             {
+                Id = s.Id,
                 StudentCode = s.StudentCode,
                 Name = s.Name,
                 Class = s.Class,
@@ -38,6 +39,7 @@ namespace BaiTest.Services.Impl
 
             return new StudentResponse
             {
+                Id = student.Id,
                 StudentCode = student.StudentCode,
                 Name = student.Name,
                 Class = student.Class,
@@ -69,7 +71,7 @@ namespace BaiTest.Services.Impl
             return newStudent;
         }
 
-        public async Task<StudentResponse?> UpdateAsync(string studentCode, StudentUpdateRequest request)
+        public async Task<StudentResponse?> UpdateAsync(String studentCode, StudentUpdateRequest request)
         {
             //Kiểm tra xem sinh viên có tồn tại không
             var student = await db.Students.SingleOrDefaultAsync(s => s.StudentCode == studentCode);
@@ -85,6 +87,7 @@ namespace BaiTest.Services.Impl
             await db.SaveChangesAsync();
             return new StudentResponse
             {
+                Id = student.Id,
                 StudentCode = student.StudentCode,
                 Name = student.Name,
                 Class = student.Class,
