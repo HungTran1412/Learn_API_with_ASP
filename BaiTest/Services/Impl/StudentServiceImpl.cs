@@ -17,8 +17,10 @@ namespace BaiTest.Services.Impl
 
         public async Task<List<StudentResponse>> GetAllAsync()
         {
+            //lay ra danh sach sinh vien
             var studentList = await db.Students.ToListAsync();
 
+            //tao moi doi tuong du lieu tra ve
             var response = studentList.Select(s => new StudentResponse
             {
                 Id = s.Id,
@@ -33,10 +35,13 @@ namespace BaiTest.Services.Impl
 
         public async Task<StudentResponse?> GetByStudentCodeAsync(string studentCode)
         {
+            //lay sinh vien bang ma sinh vien
             var student = await db.Students.SingleOrDefaultAsync(s => s.StudentCode == studentCode);
 
+            //tra ve null neu khong tim thay
             if (student == null) return null;
 
+            //tao doi tuong tra ve
             return new StudentResponse
             {
                 Id = student.Id,
@@ -51,7 +56,7 @@ namespace BaiTest.Services.Impl
         {
             //kiem tra xem ma sinh vien co ton tai khong
             var student = await db.Students.SingleOrDefaultAsync(s => s.StudentCode == request.StudentCode);
-            if (student != null)
+            if (student != null)//tra ve null neu ma sinh vien da ton tai
             {
                 return null;
             }
@@ -64,8 +69,8 @@ namespace BaiTest.Services.Impl
                 Subject = request.Subject
             };
 
-            await db.Students.AddAsync(newStudent);
             //luu vao db
+            await db.Students.AddAsync(newStudent);
             await db.SaveChangesAsync();
 
             return newStudent;
@@ -79,11 +84,12 @@ namespace BaiTest.Services.Impl
             //Trả về null nếu không tìm thấy
             if (student == null) return null;
 
+            //cap nhat du lieu
             student.Name = request.Name;
             student.Class = request.Class;
             student.Subject = request.Subject;
 
-
+            //luu vao db
             await db.SaveChangesAsync();
             return new StudentResponse
             {
@@ -97,8 +103,11 @@ namespace BaiTest.Services.Impl
 
         public async Task DeleteAsync(string studentCode)
         {
+            //tim xem sinh vien co ton tai khong
             var student = await db.Students.SingleOrDefaultAsync(s => s.StudentCode == studentCode);
-            if(student == null) return;
+            if(student == null) return;//tra ve null neu khong tim thay
+            
+            //luu vao db
             db.Students.Remove(student);
             await db.SaveChangesAsync();
         }

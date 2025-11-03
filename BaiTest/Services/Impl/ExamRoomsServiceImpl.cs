@@ -27,10 +27,9 @@ namespace BaiTest.Services.Impl
                 RoomCode = request.RoomCode,
                 Capacity = request.Capacity,
             };
-            
-            await db.ExamRooms.AddAsync(newRoom);
 
             //luu vao db
+            await db.ExamRooms.AddAsync(newRoom);
             await db.SaveChangesAsync();
 
             return room;
@@ -38,16 +37,23 @@ namespace BaiTest.Services.Impl
 
         public async Task DeleteAsync(string roomCode)
         {
+            //tim phong 
             var delete = await db.ExamRooms.SingleOrDefaultAsync(r => r.RoomCode == roomCode);
+            
+            //tra ve null neu khong tim thay
             if (delete == null) return;
+
+            //luu vao db
             db.ExamRooms.Remove(delete);
             await db.SaveChangesAsync();
         }
 
         public async Task<List<ExamRoomResponse>> GetAllAsync()
         {
+            //lay danh sach phong thi
             var roomList = await db.ExamRooms.ToListAsync();
 
+            //tao moi doi tuong tra ve
             var response = roomList.Select(r => new ExamRoomResponse
             {
                 Id = r.Id,
@@ -60,8 +66,10 @@ namespace BaiTest.Services.Impl
 
         public async Task<ExamRoomResponse> GetByCodeAsync(string roomCode)
         {
+            //tim phong bang ma
             var room = await db.ExamRooms.SingleOrDefaultAsync(r => r.RoomCode == roomCode);
-            if (room == null) return null;
+            if (room == null) return null;//tra ve null neu khong tim thay
+            //tra ve doi tuong chua thong tin
             return new ExamRoomResponse
             {
                 Id= room.Id,
@@ -80,7 +88,9 @@ namespace BaiTest.Services.Impl
             if (request.Capacity <= 0) return null;
             room.Capacity = request.Capacity;
 
+            //luu vao db
             await db.SaveChangesAsync();
+            //tra ve du lieu
             return new ExamRoomResponse
             {
                 Id = room.Id,
