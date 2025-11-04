@@ -1,6 +1,9 @@
 ﻿using BaiTest.DTOs;
+using BaiTest.DTOs.Request;
+using BaiTest.DTOs.Response;
 using BaiTest.Models;
 using BaiTest.Services;
+using BaiTest.Services.Impl;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BaiTest.Controllers
@@ -9,55 +12,80 @@ namespace BaiTest.Controllers
     [Route("/room")]
     public class ExamRoomsController : ControllerBase
     {
-        public ExamRoomsController()
-        {
-        }
-        [HttpGet]
-        public ActionResult<List<ExamRooms>> GetAll() => ExamRoomsService.GetAll;
+        private IExamRoomsService examRoomService;
 
-        [HttpGet("{id}")]
-        public ActionResult<ExamRooms> Get(int id)
+        public ExamRoomsController(IExamRoomsService examRoomService)
         {
-            var room = ExamRoomsService.Get(id);
-            if(room == null) 
-                return NotFound();
-            return Ok(room);
+            this.examRoomService = examRoomService;
         }
 
-        [HttpPost]
-        public ActionResult<ExamRooms> Add([FromBody] ExamRoomsRequest request)
+        [HttpGet("get-all")]
+        public async Task<ActionResult<List<ExamRoomResponse>>> GetAllAsync()
         {
-            if(request == null)
-                return BadRequest("Thông tin không hợp lệ!");
-            var r = ExamRoomsService.Add(request);
-
-            return Ok(r);
-        }
-
-        [HttpPut("{id}")]
-        public ActionResult<ExamRooms> Update(int id, [FromBody] ExamRoomsRequest request)
-        {
-            if(request==null)
+            try
             {
-                return BadRequest("Thông tin không hợp lệ!");
+                var roomList = await examRoomService.GetAllAsync();
+                return Ok(roomList);
             }
-
-            var update = ExamRoomsService.Update(id, request);
-
-            if(update == null)
-                return NotFound($"Không tìm thấy phòng có id: {id}");
-
-            return Ok(update);
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Lỗi server khi truy vấn dữ liệu!");
+            }
         }
 
-        [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        [HttpGet("get/{roomCode}")]
+        public async Task<ActionResult> GetByCodeAsync(string roomCode)
         {
-            var e = ExamRoomsService.Get(id);
-            if(e == null)
-                return NotFound() ;
-            ExamRoomsService.Remove(id);
-            return Ok("Xóa phòng thành công!");
+            try
+            {
+                var room = await examRoomService.GetByCodeAsync(roomCode);
+                if (room == null) return NotFound($"Không tìm thấy phòng có mã: {roomCode}");
+                return Ok(room);
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, $"Lỗi server khi truy vấn {roomCode}.");
+            }
+        }
+
+        [HttpPost("add")]
+        public async Task<ActionResult> AddAsync([FromBody] ExamRoomRequest request)
+        {
+            try
+            {
+                var newRoom = await examRoomService.AddAsync(request);
+                if (newRoom == null) return NotFound("Dữ liệu không hợp lệ!");
+
+                return Ok("Thêm phòng thi thành công!");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Lỗi " + ex.ToString());
+                throw;
+            }
+        }
+
+        [HttpPut("update/{roomCode}")]
+        public async Task<ActionResult> UpdateAsync(string roomCode, [FromBody] ExamRoomUpdateRequest request)
+        {
+            var updated = await examRoomService.UpdateAsync(roomCode, request);
+            if (updated == null) return NotFound($"Không tìm thấy phòng có mã:{roomCode}");
+            return Ok(updated);
+        }
+
+        [HttpDelete("delete/{id}")]
+        public async Task<ActionResult> DeleteAsync(string id)
+        {
+            try
+            {
+                await examRoomService.DeleteAsync(id);
+                return Ok("Xóa phòng thi thành công!");
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, "Error " + e.ToString());
+            }
         }
     }
 }

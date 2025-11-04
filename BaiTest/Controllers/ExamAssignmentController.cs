@@ -1,66 +1,127 @@
 ﻿using BaiTest.DTOs;
+using BaiTest.DTOs.Request;
+using BaiTest.DTOs.Response;
 using BaiTest.Models;
 using BaiTest.Services;
+using BaiTest.Services.Impl;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BaiTest.Controllers
 {
-    [Controller]
+    [ApiController]
     [Route("/exam")]
     public class ExamAssignmentController : ControllerBase
     {
-        public ExamAssignmentController()
+        private IExamAssignmentService examAssignmentService;
+
+        public ExamAssignmentController(IExamAssignmentService examAssignmentService)
         {
+            this.examAssignmentService = examAssignmentService;
         }
 
-
-        [HttpGet]
-        public ActionResult<List<ExamAssignments>> GetAll() => ExamAssignmentService.GetAll;
-
-        [HttpGet("{id}")]
-        public ActionResult<ExamAssignments> Get(int id)
+        [HttpGet("get-all")]
+        public async Task<ActionResult<List<StudentInRoomResponse>>> GetListStudentInRoomAsync()
         {
-            var room = ExamAssignmentService.GetExamByRoomId(id);
-            if (room == null)
+            try
             {
-                return NotFound();
+                var result = await examAssignmentService.GetListStudentByRoomAsync();
+                return Ok(result);
             }
-            return Ok(room);
-        }
-
-
-        [HttpGet("student/{roomId}")]
-        public ActionResult<List<Student>> GetStudentInRoom(int roomId)
-        {
-            var assignment = ExamAssignmentService.GetListStudentInRoom(roomId);
-            if(assignment == null)
-                return NotFound($"Không tìm thấy phân công nào trong phòng ID {roomId}.");
-            return Ok(assignment);
-        }
-
-
-        [HttpPost]
-        public ActionResult<ExamAssignments> Add([FromBody] ExamAssignmentRequest request)
-        {
-            // 1. Kiểm tra tính hợp lệ cơ bản của dữ liệu đầu vào
-            if (request == null)
+            catch (Exception e)
             {
-                return BadRequest("Dữ liệu phân công không hợp lệ.");
+                return StatusCode(500, "Error : " + e.ToString());
             }
-
-            // 2. Gọi hàm Service
-            var newAssignment = ExamAssignmentService.Add(request);
-
-            // 3. Xử lý kết quả từ Service
-            if (newAssignment == null)
-            {
-               
-                return BadRequest("Lỗi phân công: Kiểm tra ID sinh viên, ID phòng thi hoặc sức chứa phòng.");
-            }
-
-            return CreatedAtAction(nameof(Get), new { id = newAssignment.Id }, newAssignment);
         }
 
-      
+        [HttpPost("add")]
+        public async Task<ActionResult> ExamScheduleAsync([FromBody] ExamScheduleRequest request)
+        {
+            try
+            {
+                var add = await examAssignmentService.ExamScheduleAsync(request);
+                if (add == null) return NotFound("Dữ liệu không hợp lệ!");
+                return Ok("Thêm thành công!");
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, "error: " + e.ToString());
+            }
+        }
+
+        [HttpGet("/room-stat")]
+        public async Task<ActionResult<List<QuantityStatisticResponse>>> GetQuantityStatisticAsync()
+        {
+            try
+            {
+                var result = await examAssignmentService.StatisticQuantityRemainingAsync();
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, "Error: " + e.ToString());
+            }
+        }
+
+        [HttpGet("/unassigned")]
+        public async Task<ActionResult<List<StudentResponse>>> GetUnassignmentStudentAsync()
+        {
+            try
+            {
+                var result = await examAssignmentService.GetStudentUnassignmentAsync();
+
+                if (result.Any()) return Ok(result);
+
+                return NotFound("Tất cả sinh viên đã được xếp phòng");
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, "Error: " + e.ToString());
+            }
+        }
+
+        [HttpGet("/over-capacity")]
+        public async Task<ActionResult<List<OverCapacityResponse>>> GetOverCapacityRoomAsync()
+        {
+            try
+            {
+                var result = await examAssignmentService.GetOverCapacityRoomAsync();
+                if (result == null) return NotFound();
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, "Error: " + e.ToString());
+            }
+        }
+
+        [HttpGet("/duplicate-student")]
+        public async Task<ActionResult<List<StudentResponse>>> CheckDuplicateStudentAsync()
+        {
+            try
+            {
+                var result = await examAssignmentService.CheckDuplicateStudentAsync();
+                if (result == null) return NotFound();
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, "Error: " + e.ToString());
+            }
+        }
+
+        [HttpGet("/subject")]
+        public async Task<ActionResult<List<RoomSubjectResponse>>> GetExamNameInRoomAsync()
+        {
+            try
+            {
+                var result = await examAssignmentService.GetExamNameInRoomAsync();
+                if (result == null) return NotFound();
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, "Error: " + e.ToString());
+            }
+        }
     }
 }
